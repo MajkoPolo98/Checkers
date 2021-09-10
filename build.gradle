@@ -1,22 +1,21 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.4'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
-group = 'com.project'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+javafx {
+    version = "11.0.2"
+    modules = [ 'javafx.controls' ]
+}
+
+group 'com.kodilla'
+version '1.0-SNAPSHOT'
+mainClassName = 'com.project.checkers.CheckersApplication'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
 
-test {
-    useJUnitPlatform()
 }
