@@ -26,7 +26,19 @@ public class CheckersApplication extends Application {
         Board board = new Board(settings);
         GridPane gridPane = board.makeBoard();
 
-        Scene scene = new Scene(gridPane, 850, 850, Color.WHITESMOKE);
+        for (int i = 0; i < 8; i+= 1){
+            for (int j = 0; j < 3; j+=1) {
+                if((i+j)%2 == 0){
+                    new Pawn(board,false,false, settings.getPawnUpperColor(), i, j).makePawn();
+                    board.boardData[i][j] = "upper";
+                } else {
+                    new Pawn(board,false,true,settings.getPawnLowerColor(),i, (7-j)).makePawn();
+                    board.boardData[i][7-j] = "lower";
+                }
+            }
+        }
+
+        Scene scene = new Scene(gridPane, 850, 850);
 
         primaryStage.setTitle("Checkers");
         primaryStage.setScene(scene);

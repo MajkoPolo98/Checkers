@@ -15,21 +15,13 @@ import javafx.scene.paint.Color;
 public class Board {
 
     GridPane grid = new GridPane();
-    private Color lightColor = Color.WHITESMOKE;
-    private Color darkColor = Color.DIMGREY;
+
     Settings settings;
-    private Pawn[][] piece;
     public Board(Settings settings) {
         this.settings = settings;
     }
 
-    public void setLightColor(Color lightColor) {
-        this.lightColor = lightColor;
-    }
-
-    public void setDarkColor(Color darkColor) {
-        this.darkColor = darkColor;
-    }
+    String boardData[][] = new String[8][8];
 
     public GridPane makeBoard() {
 
@@ -43,20 +35,24 @@ public class Board {
             for (int j = 0; j < 8; j += 1) {
                 if ((i + j) % 2 == 0) {
                     grid.add(new Rectangle(100, 100, settings.getBoardLightColor()), i, j);
+                    boardData[i][j] = "o";
                 } else {
                     grid.add(new Rectangle(100, 100, settings.getBoardDarkColor()), i, j);
+                    boardData[i][j] = "o";
                 }
             }
         }
-        for (int i = 0; i < 8; i+= 1){
+/*        for (int i = 0; i < 8; i+= 1){
             for (int j = 0; j < 3; j+=1) {
                 if((i+j)%2 == 0){
                     new Pawn(grid,false,false, settings.getPawnUpperColor(), i, j).makePawn();
+                    boardData[i][j] = "upper";
                 } else {
                     new Pawn(grid,false,true,settings.getPawnLowerColor(),i, (7-j)).makePawn();
+                    boardData[i][j] = "lower";
                 }
             }
-        }
+        }*/
 
         grid.setGridLinesVisible(true);
         grid.setPadding(new Insets(25,25,25,25));
@@ -64,6 +60,6 @@ public class Board {
     }
 
     public int getIndexFromCoord(int x, int y){
-        return (x+y)*y;
+        return 8*x+y;
     }
 }

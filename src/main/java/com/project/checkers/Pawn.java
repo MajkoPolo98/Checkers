@@ -11,18 +11,19 @@ public class Pawn extends StackPane {
     private boolean queenPawn;
     private boolean lowerPawn;
     private Color color;
-    private GridPane grid;
+    private Board board;
     private int posX;
     private int posY;
+    Rectangle optionSquare1 = new Rectangle(100, 100, Color.YELLOW);
+    Rectangle optionSquare2 = new Rectangle(100, 100, Color.YELLOW);
 
 
 
-
-    public Pawn(GridPane grid, boolean queenPawn, boolean lowerPawn, Color color, int posX, int posY) {
+    public Pawn(Board board, boolean queenPawn, boolean lowerPawn, Color color, int posX, int posY) {
         this.queenPawn = queenPawn;
         this.lowerPawn = lowerPawn;
         this.color = color;
-        this.grid = grid;
+        this.board = board;
         this.posX = posX;
         this.posY = posY;
 
@@ -33,9 +34,15 @@ public class Pawn extends StackPane {
         pawn.setStroke(Color.BLACK);
         pawn.setStrokeWidth(3);
 
-        grid.add(pawn, posX, posY);
+        board.grid.add(pawn, posX, posY);
         pawn.setOnMouseClicked((e) -> {
-            //Tu musi być coś co usuwa makeOptionTiles() utworzone wcześniej
+            for (int i = 0; i < board.boardData.length; i++) {
+                for (int j = 0; j < board.boardData[i].length; j++) {
+                    if(board.boardData[i][j].equals("OptionSquare")){
+                        //Funkcja, która powinna usunąć kafelki optionSquare1 i optionSquare2
+                    }
+                }
+            }
             makeOptionTiles();
         });
     }
@@ -61,14 +68,24 @@ public class Pawn extends StackPane {
     }
 
     public void makeOptionTiles() {
-        Rectangle optionSquare1 = new Rectangle(100, 100, Color.YELLOW);
-        Rectangle optionSquare2 = new Rectangle(100, 100, Color.YELLOW);
         if (lowerPawn & !queenPawn) {
-            grid.add(optionSquare1, posX-1 ,posY-1);
-            grid.add(optionSquare2, posX+1 ,posY-1);
+            if(!board.boardData[posX-1][posY-1].equals("lower") & posX>=1) {
+                board.grid.add(optionSquare1, posX - 1, posY - 1);
+                board.boardData[posX-1][posY-1] = "OptionSquare";
+            }
+            if(!board.boardData[posX + 1][posY-1].equals("lower") & posX<=7) {
+                board.grid.add(optionSquare2, posX + 1, posY - 1);
+                board.boardData[posX + 1][posY-1] = "OptionSquare";
+            }
         } else if (!lowerPawn & !queenPawn) {
-            grid.add(optionSquare1, posX-1 ,posY+1);
-            grid.add(optionSquare2, posX+1 ,posY+1);
+            if(!board.boardData[posX-1][posY+1].equals("upper") & posX>=1) {
+                board.grid.add(optionSquare1, posX - 1, posY + 1);
+                board.boardData[posX-1][posY+1] = "OptionSquare";
+            }
+            if(!board.boardData[posX + 1][posY + 1].equals("upper") & posX>=1) {
+                board.boardData[posX + 1][posY + 1] = "OptionSquare";
+                board.grid.add(optionSquare2, posX + 1, posY + 1);
+            }
         } else if (queenPawn) {
 
         }
