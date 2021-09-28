@@ -128,8 +128,10 @@ public class Board {
                     if (!isAnotherMove) {
                         teamTurn = !teamTurn;
                         this.previousTile = clickedTile;
-                        if(!teamTurn && isSingleplayerGame){
-                            computerMove();
+                        while(!teamTurn) {
+                            if (isSingleplayerGame) {
+                                computerMove();
+                            }
                         }
                     } else {
                         this.previousTile = clickedTile;
@@ -240,6 +242,12 @@ public class Board {
         List<Tile> availableMoveList = tileList.stream().filter(s -> (s.getTileType()==TileType.MOVE)).collect(Collectors.toList());
         Tile availableMoveTile = availableMoveList.get(random.nextInt(availableMoveList.size()));
         doClick(availableMoveTile.getCol(), availableMoveTile.getRow());
+        while (isAnotherMove){
+            availableMoveList.clear();
+            availableMoveList = tileList.stream().filter(s -> (s.getTileType()==TileType.MOVE)).collect(Collectors.toList());
+            availableMoveTile = availableMoveList.get(random.nextInt(availableMoveList.size()));
+            doClick(availableMoveTile.getCol(), availableMoveTile.getRow());
+        }
 
     }
 
