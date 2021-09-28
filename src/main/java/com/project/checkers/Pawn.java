@@ -94,26 +94,29 @@ public class Pawn extends Board {
         if(!queenPawn) {
             availableTiles.clear();
             beatTiles.clear();
-            for (Integer diff: differenceList){
+            for (Integer diff: differenceList) {
                 int dir = multiplier(); //directory - UP or DOWN
                 int prev = index;
-                int count = index - diff*multiplier();
+                int count = index - diff * multiplier();
                 availableTiles.put(diff, new LinkedList<>());
+                try {
+                    if ((diff > 0) &&                      //MOVE REGULAR PAWN
+                            ((prev / 8) == (count / 8 + dir)) &&
+                            (board.getTileList().get(count).isEmpty())
+                    ) {
+                        movePawnInstruction(diff, count);
 
-                if((diff>0) &&                      //MOVE REGULAR PAWN
-                        ((prev/8) == (count/8 + dir)) &&
-                        (board.getTileList().get(count).isEmpty())
-                ){
-                    movePawnInstruction(diff, count);
+                    } else if ((diff > 0) &&              //BEAT REGULAR PAWN
+                            ((prev / 8) == (count / 8 + dir)) &&
+                            !(board.getTileList().get(count).isEmpty()) &&
+                            (board.getTileList().get(count).getPawn().isLowerPawn() != lowerPawn) &&
+                            ((count / 8) == ((count - diff * multiplier()) / 8 + dir)) &&
+                            (board.getTileList().get(count - diff * multiplier()).isEmpty())
+                    ) {
+                        beatPawnInstruction(diff * multiplier(), count);
+                    }
+                }catch (IndexOutOfBoundsException ignored){
 
-                } else if ((diff>0) &&              //BEAT REGULAR PAWN
-                        ((prev/8) == (count/8 + dir)) &&
-                        !(board.getTileList().get(count).isEmpty()) &&
-                        (board.getTileList().get(count).getPawn().isLowerPawn() != lowerPawn) &&
-                        ((count / 8) == ((count-diff*multiplier()) / 8 + dir)) &&
-                        (board.getTileList().get(count-diff*multiplier()).isEmpty())
-                ){
-                    beatPawnInstruction(diff*multiplier(),count);
                 }
             }
 
