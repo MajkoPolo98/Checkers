@@ -11,7 +11,6 @@ import java.util.List;
 public class Pawn extends Board {
     private boolean queenPawn;
     private boolean lowerPawn;
-    private Color color;
     private boolean isClicked;
     private Board board;
     private int index;
@@ -38,10 +37,11 @@ public class Pawn extends Board {
     }
 
         public Circle makePawn(){
+        Color color;
         if (lowerPawn){
-            color = settings.getPawnLowerColor();
+            color = board.getSettings().getPawnLowerColor();
         } else {
-            color = settings.getPawnUpperColor();
+            color = board.getSettings().getPawnUpperColor();
         }
         Circle pawn = new Circle(40, color);
         pawn.setStroke(Color.BLACK);
@@ -61,7 +61,7 @@ public class Pawn extends Board {
         }
 
         if(queenPawn){
-            pawn.setStroke(settings.getQueenStrokeColor());
+            pawn.setStroke(board.getSettings().getQueenStrokeColor());
         }
 
         return pawn;
@@ -81,7 +81,7 @@ public class Pawn extends Board {
     }
 
     public void resetOptionTiles(){
-        for (Tile tile : board.tileList) {
+        for (Tile tile : board.getTileList()) {
             if (tile.getTileType() != TileType.NONE) {
                 tile.setTileType(TileType.NONE);
                 tile.makeResetTile();
@@ -102,16 +102,16 @@ public class Pawn extends Board {
 
                 if((diff>0) &&                      //MOVE REGULAR PAWN
                         ((prev/8) == (count/8 + dir)) &&
-                        (board.tileList.get(count).isEmpty())
+                        (board.getTileList().get(count).isEmpty())
                 ){
                     movePawnInstruction(diff, count);
 
                 } else if ((diff>0) &&              //BEAT REGULAR PAWN
                         ((prev/8) == (count/8 + dir)) &&
-                        !(board.tileList.get(count).isEmpty()) &&
-                        (board.tileList.get(count).getPawn().isLowerPawn() != lowerPawn) &&
+                        !(board.getTileList().get(count).isEmpty()) &&
+                        (board.getTileList().get(count).getPawn().isLowerPawn() != lowerPawn) &&
                         ((count / 8) == ((count-diff*multiplier()) / 8 + dir)) &&
-                        (board.tileList.get(count-diff*multiplier()).isEmpty())
+                        (board.getTileList().get(count-diff*multiplier()).isEmpty())
                 ){
                     beatPawnInstruction(diff*multiplier(),count);
                 }
@@ -132,7 +132,7 @@ public class Pawn extends Board {
 
                     while ((count >= 0) && (count <= 63)) {
                         if (((prev / 8) == (count / 8 + dir)) &&            //MOVE QUEEN PAWN
-                                (board.tileList.get(count).isEmpty()) &&
+                                (board.getTileList().get(count).isEmpty()) &&
                                 (metPawn <= 1)
                         ) {
                             movePawnInstruction(diff, count);
@@ -140,10 +140,10 @@ public class Pawn extends Board {
                             count = count - diff;
 
                         } else if(((prev / 8) == (count / 8 + dir)) &&      //BEAT QUEEN PAWN
-                                !(board.tileList.get(count).isEmpty()) &&
-                                (board.tileList.get(count).getPawn().isLowerPawn() != lowerPawn) &&
+                                !(board.getTileList().get(count).isEmpty()) &&
+                                (board.getTileList().get(count).getPawn().isLowerPawn() != lowerPawn) &&
                                 ((count / 8) == ((count-diff) / 8 + dir)) &&
-                                (board.tileList.get(count-diff).isEmpty()) &&
+                                (board.getTileList().get(count-diff).isEmpty()) &&
                                 (metPawn < 1)
                         ) {
                             metPawn += 1;
@@ -155,7 +155,7 @@ public class Pawn extends Board {
                         }
                     }
                 }
-            } catch (IndexOutOfBoundsException exc) {
+            } catch (IndexOutOfBoundsException ignored) {
 
             }
         }
@@ -165,8 +165,8 @@ public class Pawn extends Board {
         for (Integer diff: differenceList){
             if(beatTiles.get(diff) == null) {
                 for (Integer indexToDelete : availableTiles.get(diff)) {
-                    board.tileList.get(indexToDelete).setTileType(TileType.NONE);
-                    board.tileList.get(indexToDelete).makeResetTile();
+                    board.getTileList().get(indexToDelete).setTileType(TileType.NONE);
+                    board.getTileList().get(indexToDelete).makeResetTile();
                 }
                 availableTiles.get(diff).clear();
 
@@ -234,19 +234,19 @@ public class Pawn extends Board {
     }
 
     public void movePawnInstruction(Integer indexDifference, Integer counterIndex){
-        board.tileList.get(counterIndex).setTileType(TileType.MOVE);
+        board.getTileList().get(counterIndex).setTileType(TileType.MOVE);
         availableTiles.get(indexDifference).add(counterIndex);
-        board.tileList.get(counterIndex).makeResetTile();
+        board.getTileList().get(counterIndex).makeResetTile();
     }
 
     public void beatPawnInstruction(Integer indexDifference, Integer counterIndex){
-        board.tileList.get(counterIndex).setTileType(TileType.BEAT);
+        board.getTileList().get(counterIndex).setTileType(TileType.BEAT);
         beatTiles.put(indexDifference,counterIndex);
         availableTiles.get(indexDifference).add(counterIndex);
-        board.tileList.get(counterIndex-indexDifference).setTileType(TileType.MOVE);
+        board.getTileList().get(counterIndex-indexDifference).setTileType(TileType.MOVE);
         availableTiles.get(indexDifference).add(counterIndex-indexDifference);
-        board.tileList.get(counterIndex).makeResetTile();
-        board.tileList.get(counterIndex-indexDifference).makeResetTile();
+        board.getTileList().get(counterIndex).makeResetTile();
+        board.getTileList().get(counterIndex-indexDifference).makeResetTile();
     }
 
 

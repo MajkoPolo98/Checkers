@@ -4,25 +4,18 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.Set;
-
-
 public class Menu {
 
-    boolean gameInProgress = false;
+    private boolean gameInProgress = false;
     private Settings settings = new Settings();
     private boolean isSingleplayerGame;
     private Scene gameScene;
@@ -52,9 +45,7 @@ public class Menu {
 
 
         //Options button
-        options.setOnMouseClicked(b1 -> {
-            primaryStage.setScene(optionMenu(primaryStage));
-        });
+        options.setOnMouseClicked(b1 -> primaryStage.setScene(optionMenu(primaryStage)));
 
         //Multiplayer button
         multiplayer.setOnMouseClicked(b1 -> {
@@ -72,6 +63,7 @@ public class Menu {
         });
 
         //Continue button
+
         continueGame.setOnMouseClicked(e -> {
             primaryStage.setScene(gameScene);
         });
@@ -98,8 +90,6 @@ public class Menu {
 
         darkModeColors.setOnMouseClicked(e -> {
             settings.darkMode();
-            //primaryStage.getScene().setFill(Paint.valueOf("#FF00FF"));
-
 
             optionsVBox.setStyle("-fx-background-color: #696969");
             primaryStage.setScene(optionsScene);

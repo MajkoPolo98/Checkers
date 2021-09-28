@@ -16,15 +16,16 @@ import java.util.stream.Collectors;
 
 public class Board {
 
-    List<Tile> tileList = new LinkedList<>();
-    Settings settings;
+    private List<Tile> tileList = new LinkedList<>();
+    private Settings settings;
     private boolean teamTurn = true;
+
     public Board(Settings settings) {
         this.settings = settings;
     }
-    //GridPane grid = new GridPane();
-    boolean isAnotherMove = false;
-    Tile previousTile;
+
+    private boolean isAnotherMove = false;
+    private Tile previousTile;
     private boolean isSingleplayerGame;
 
 
@@ -114,7 +115,7 @@ public class Board {
                                     }
 
                                 }
-                            } catch (IndexOutOfBoundsException e) {
+                            } catch (IndexOutOfBoundsException ignored) {
                             }
                         }
                     } else {
@@ -222,7 +223,7 @@ public class Board {
             ){
                 result = true;
             } else {
-                return result;
+                return false;
             }
 
         }
@@ -231,9 +232,9 @@ public class Board {
 
     public void computerMove(){
         Random random = new Random();
-        List<Pawn>computerPawns = tileList.stream().filter(tile -> (!tile.isEmpty() &&!tile.getPawn().isLowerPawn())).map(tile -> tile.getPawn()).collect(Collectors.toList());
+        List<Pawn>computerPawns = tileList.stream().filter(tile -> (!tile.isEmpty() &&!tile.getPawn().isLowerPawn())).map(Tile::getPawn).collect(Collectors.toList());
 
-        List<Pawn> availablePawnList =  computerPawns.stream().filter(pawn -> pawn.isMoveAvailable()).collect(Collectors.toList());
+        List<Pawn> availablePawnList =  computerPawns.stream().filter(Pawn::isMoveAvailable).collect(Collectors.toList());
         Pawn availablePawn = availablePawnList.get(random.nextInt(availablePawnList.size()));
         doClick(availablePawn.getIndex()%8, availablePawn.getIndex()/8);
         List<Tile> availableMoveList = tileList.stream().filter(s -> (s.getTileType()==TileType.MOVE)).collect(Collectors.toList());
@@ -252,4 +253,11 @@ public class Board {
         }
     }
 
+    public List<Tile> getTileList() {
+        return tileList;
+    }
+
+    public Settings getSettings() {
+        return settings;
+    }
 }
