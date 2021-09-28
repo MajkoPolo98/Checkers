@@ -1,94 +1,268 @@
 package com.project.checkers;
 
-import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 
-public class Pawn extends StackPane {
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
+
+public class Pawn extends Board {
     private boolean queenPawn;
     private boolean lowerPawn;
     private Color color;
+    private boolean isClicked;
     private Board board;
-    private int posX;
-    private int posY;
-    Rectangle optionSquare1 = new Rectangle(100, 100, Color.YELLOW);
-    Rectangle optionSquare2 = new Rectangle(100, 100, Color.YELLOW);
+    private int index;
 
 
 
-    public Pawn(Board board, boolean queenPawn, boolean lowerPawn, Color color, int posX, int posY) {
+    private List<Integer> differenceList = new LinkedList<>();
+    private HashMap<Integer, LinkedList<Integer>> availableTiles = new HashMap<>();
+    private HashMap<Integer, Integer> beatTiles = new HashMap<>();
+
+
+    public Pawn(boolean queenPawn, boolean lowerPawn, boolean isClicked, Settings settings, Board board, int index) {
+        super(settings);
         this.queenPawn = queenPawn;
         this.lowerPawn = lowerPawn;
-        this.color = color;
+        this.isClicked = isClicked;
         this.board = board;
-        this.posX = posX;
-        this.posY = posY;
-
+        this.index = index;
+        makePawn();
+        differenceList.add(-9);
+        differenceList.add(-7);
+        differenceList.add(7);
+        differenceList.add(9);
     }
 
-    public void makePawn(){
+        public Circle makePawn(){
+        if (lowerPawn){
+            color = settings.getPawnLowerColor();
+        } else {
+            color = settings.getPawnUpperColor();
+        }
         Circle pawn = new Circle(40, color);
         pawn.setStroke(Color.BLACK);
         pawn.setStrokeWidth(3);
 
-        board.grid.add(pawn, posX, posY);
-        pawn.setOnMouseClicked((e) -> {
-            for (int i = 0; i < board.boardData.length; i++) {
-                for (int j = 0; j < board.boardData[i].length; j++) {
-                    if(board.boardData[i][j].equals("OptionSquare")){
-                        //Funkcja, która powinna usunąć kafelki optionSquare1 i optionSquare2
-                    }
-                }
+
+        if(lowerPawn){
+            if (index <= 7){
+                setQueenPawn(true);
             }
-            makeOptionTiles();
-        });
+        }
+
+        if(!lowerPawn) {
+            if (index / 8 == 7) {
+                setQueenPawn(true);
+            }
+        }
+
+        if(queenPawn){
+            pawn.setStroke(settings.getQueenStrokeColor());
+        }
+
+        return pawn;
+
     }
 
-    public boolean isQueenPawn() {
-        return queenPawn;
+
+    public void setClicked(boolean clicked) {
+        isClicked = clicked;
     }
+
+
+    public void makeOptionTiles() {
+        resetOptionTiles(); //Delete previous choice
+        makeMoveTiles();
+        //makeBeatTiles();
+    }
+
+    public void resetOptionTiles(){
+        for (Tile tile : board.tileList) {
+            if (tile.getTileType() != TileType.NONE) {
+                tile.setTileType(TileType.NONE);
+                tile.makeResetTile();
+            }
+        }
+    }
+
+
+    public void makeMoveTiles(){
+        if(!queenPawn) {
+            availableTiles.clear();
+            beatTiles.clear();
+            for (Integer diff: differenceList){
+                int dir = multiplier(); //directory - UP or DOWN
+                int prev = index;
+                int count = index - diff*multiplier();
+                availableTiles.put(diff, new LinkedList<>());
+
+                if((diff>0) &&                      //MOVE REGULAR PAWN
+                        ((prev/8) == (count/8 + dir)) &&
+                        (board.tileList.get(count).isEmpty())
+                ){
+                    movePawnInstruction(diff, count);
+
+                } else if ((diff>0) &&              //BEAT REGULAR PAWN
+                        ((prev/8) == (count/8 + dir)) &&
+                        !(board.tileList.get(count).isEmpty()) &&
+                        (board.tileList.get(count).getPawn().isLowerPawn() != lowerPawn) &&
+                        ((count / 8) == ((count-diff*multiplier()) / 8 + dir)) &&
+                        (board.tileList.get(count-diff*multiplier()).isEmpty())
+                ){
+                    beatPawnInstruction(diff*multiplier(),count);
+                }
+            }
+
+        } else { //KROLOWA
+            availableTiles.clear();
+            beatTiles.clear();
+
+            try {
+                for (Integer diff : differenceList) {
+                    int metPawn = 0;
+                    int dir = Math.abs(diff) / diff; //directory - UP or DOWN
+                    int prev = index;
+                    int count = index - diff;
+                    availableTiles.put(diff, new LinkedList<>());
+
+
+                    while ((count >= 0) && (count <= 63)) {
+                        if (((prev / 8) == (count / 8 + dir)) &&            //MOVE QUEEN PAWN
+                                (board.tileList.get(count).isEmpty()) &&
+                                (metPawn <= 1)
+                        ) {
+                            movePawnInstruction(diff, count);
+                            prev = count;
+                            count = count - diff;
+
+                        } else if(((prev / 8) == (count / 8 + dir)) &&      //BEAT QUEEN PAWN
+                                !(board.tileList.get(count).isEmpty()) &&
+                                (board.tileList.get(count).getPawn().isLowerPawn() != lowerPawn) &&
+                                ((count / 8) == ((count-diff) / 8 + dir)) &&
+                                (board.tileList.get(count-diff).isEmpty()) &&
+                                (metPawn < 1)
+                        ) {
+                            metPawn += 1;
+                            beatPawnInstruction(diff, count);
+                            prev = count;
+                            count = count - diff;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            } catch (IndexOutOfBoundsException exc) {
+
+            }
+        }
+    }
+
+    public void beatTilesOnly(){
+        for (Integer diff: differenceList){
+            if(beatTiles.get(diff) == null) {
+                for (Integer indexToDelete : availableTiles.get(diff)) {
+                    board.tileList.get(indexToDelete).setTileType(TileType.NONE);
+                    board.tileList.get(indexToDelete).makeResetTile();
+                }
+                availableTiles.get(diff).clear();
+
+            }
+        }
+    }
+
+
+    public boolean isMoveAvailable(){
+        boolean result = false;
+        resetOptionTiles();
+        makeMoveTiles();
+        for(Integer diff: differenceList) {
+            if (!this.availableTiles.get(diff).isEmpty()) {
+                result = true;
+                break;
+            }
+        }
+        resetOptionTiles();
+        return result;
+    }
+
+
+    public boolean isAnotherMovePossible(){
+        boolean result = false;
+        resetOptionTiles();
+        HashMap<Integer, LinkedList<Integer>> previousAvailableTiles = getAvailableTiles();
+        HashMap<Integer, Integer> previousBeatTiles = getBeatTiles();
+        makeMoveTiles();
+        beatTilesOnly();
+        if(!this.beatTiles.isEmpty()){
+            result = true;
+        }
+        this.availableTiles = previousAvailableTiles;
+        this.beatTiles = previousBeatTiles;
+
+        return result;
+    }
+
 
     public boolean isLowerPawn() {
         return lowerPawn;
     }
 
-    public int getPosX() {
-        return posX;
+
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
-    public int getPosY() {
-        return posY;
-    }
-
-    public int getIndex(){
-        return posX*8+posY;
-    }
-
-    public void makeOptionTiles() {
-        if (lowerPawn & !queenPawn) {
-            if(!board.boardData[posX-1][posY-1].equals("lower") & posX>=1) {
-                board.grid.add(optionSquare1, posX - 1, posY - 1);
-                board.boardData[posX-1][posY-1] = "OptionSquare";
-            }
-            if(!board.boardData[posX + 1][posY-1].equals("lower") & posX<=7) {
-                board.grid.add(optionSquare2, posX + 1, posY - 1);
-                board.boardData[posX + 1][posY-1] = "OptionSquare";
-            }
-        } else if (!lowerPawn & !queenPawn) {
-            if(!board.boardData[posX-1][posY+1].equals("upper") & posX>=1) {
-                board.grid.add(optionSquare1, posX - 1, posY + 1);
-                board.boardData[posX-1][posY+1] = "OptionSquare";
-            }
-            if(!board.boardData[posX + 1][posY + 1].equals("upper") & posX>=1) {
-                board.boardData[posX + 1][posY + 1] = "OptionSquare";
-                board.grid.add(optionSquare2, posX + 1, posY + 1);
-            }
-        } else if (queenPawn) {
-
+    public int multiplier() {
+        if (lowerPawn) {
+            return 1;
+        } else {
+            return -1;
         }
     }
 
+    public boolean isClicked() {
+        return isClicked;
+    }
+
+    public void setQueenPawn(boolean queenPawn) {
+        this.queenPawn = queenPawn;
+    }
+
+    public void movePawnInstruction(Integer indexDifference, Integer counterIndex){
+        board.tileList.get(counterIndex).setTileType(TileType.MOVE);
+        availableTiles.get(indexDifference).add(counterIndex);
+        board.tileList.get(counterIndex).makeResetTile();
+    }
+
+    public void beatPawnInstruction(Integer indexDifference, Integer counterIndex){
+        board.tileList.get(counterIndex).setTileType(TileType.BEAT);
+        beatTiles.put(indexDifference,counterIndex);
+        availableTiles.get(indexDifference).add(counterIndex);
+        board.tileList.get(counterIndex-indexDifference).setTileType(TileType.MOVE);
+        availableTiles.get(indexDifference).add(counterIndex-indexDifference);
+        board.tileList.get(counterIndex).makeResetTile();
+        board.tileList.get(counterIndex-indexDifference).makeResetTile();
+    }
+
+
+    public boolean isQueenPawn() {
+        return queenPawn;
+    }
+
+    public HashMap<Integer, LinkedList<Integer>> getAvailableTiles() {
+        return availableTiles;
+    }
+
+    public HashMap<Integer, Integer> getBeatTiles() {
+        return beatTiles;
+    }
+
+    public int getIndex() {
+        return index;
+    }
 }

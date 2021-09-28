@@ -1,7 +1,9 @@
 package com.project.checkers;
 import javafx.application.Application;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -10,7 +12,13 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import java.lang.*;
+
+import java.util.Scanner;
+import java.util.Stack;
+
 
 public class CheckersApplication extends Application {
 
@@ -18,30 +26,15 @@ public class CheckersApplication extends Application {
         launch(args);
     }
 
-
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        Settings settings = new Settings();
-        Board board = new Board(settings);
-        GridPane gridPane = board.makeBoard();
-
-        for (int i = 0; i < 8; i+= 1){
-            for (int j = 0; j < 3; j+=1) {
-                if((i+j)%2 == 0){
-                    new Pawn(board,false,false, settings.getPawnUpperColor(), i, j).makePawn();
-                    board.boardData[i][j] = "upper";
-                } else {
-                    new Pawn(board,false,true,settings.getPawnLowerColor(),i, (7-j)).makePawn();
-                    board.boardData[i][7-j] = "lower";
-                }
-            }
-        }
-
-        Scene scene = new Scene(gridPane, 850, 850);
+        Menu menu = new Menu();
+        primaryStage.setScene(menu.mainMenu(primaryStage));
 
         primaryStage.setTitle("Checkers");
-        primaryStage.setScene(scene);
         primaryStage.show();
+
+
     }
 }
